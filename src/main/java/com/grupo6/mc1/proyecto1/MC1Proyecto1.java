@@ -4,6 +4,8 @@
 
 package com.grupo6.mc1.proyecto1;
 
+import com.grupo6.mc1.proyecto1.InterfazGrafica.PantallaPrincipal;
+
 /**
  *
  * @author José Santiago Herrera Furlán - 202403244
@@ -12,6 +14,7 @@ package com.grupo6.mc1.proyecto1;
 public class MC1Proyecto1 {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        PantallaPrincipal pantallaPrincipal = new PantallaPrincipal();
+        pantallaPrincipal.setVisible(true);
     }
 }
