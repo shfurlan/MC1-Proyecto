@@ -5,15 +5,20 @@
 package com.grupo6.mc1.proyecto1.InterfazGrafica;
 
 import com.grupo6.mc1.proyecto1.LectorArchivosXML;
+import com.grupo6.mc1.proyecto1.MapaKarnaugh;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.io.File;
-import java.util.Arrays;
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -97,7 +102,7 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         PanelMapa.setLayout(PanelMapaLayout);
         PanelMapaLayout.setHorizontalGroup(
             PanelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 618, Short.MAX_VALUE)
+            .addGap(0, 612, Short.MAX_VALUE)
         );
         PanelMapaLayout.setVerticalGroup(
             PanelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -128,8 +133,8 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(ScrollMapa, javax.swing.GroupLayout.PREFERRED_SIZE, 620, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ScrollMapa, javax.swing.GroupLayout.DEFAULT_SIZE, 614, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(PanelOperaciones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
@@ -143,34 +148,107 @@ public class PantallaPrincipal extends javax.swing.JFrame {
 
     private void ItemAbrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ItemAbrirActionPerformed
         int seleccionArchivo = SelectorArchivo.showOpenDialog(VentanaSeleccionarArchivo);
-        
-        // Al cargar el archivo, leer mapa
+
         if (seleccionArchivo == JFileChooser.APPROVE_OPTION) {
-            // Obtener archivo
             File archivo = SelectorArchivo.getSelectedFile();
-            
-            // Leer mapa
+
             try {
                 LectorArchivosXML lector = new LectorArchivosXML();
-                int[][] mapa = lector.leerMapa(archivo);
-                
-                // Mostrar el mapa en el panel de mapa
-                PanelMapa.setLayout(new GridLayout(mapa.length, mapa[0].length, 0, 0));
-                for (int i = 0; i < mapa.length; i++) {
-                    for (int j = 0; j < mapa[0].length; j++) {
-                        JLabel celda = new JLabel("" + mapa[i][j], SwingConstants.CENTER);
-                        celda.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                        PanelMapa.add(celda);
+                MapaKarnaugh mapaK = lector.leerMapa(archivo);
+                int[][] mapa = mapaK.mapa;
+                String[] variables = mapaK.variables;
+
+                int filas = mapa.length;
+                int columnas = mapa[0].length;
+
+                int totalVariables = 0;
+                for (String var : variables) {
+                    if (var != null && !var.isEmpty()) {
+                        totalVariables++;
                     }
                 }
-                
+
+                int varFilas = totalVariables / 2;
+                int varColumnas = totalVariables - varFilas;
+
+                PanelMapa.removeAll();
+                PanelMapa.setLayout(new GridBagLayout());
+
+                Font encabezadoFont = new Font("Arial", Font.BOLD, 16);
+                Font contenidoFont = new Font("Arial", Font.PLAIN, 16);
+                Border bordeEncabezado = BorderFactory.createLineBorder(Color.BLACK);
+                Border bordeCelda = BorderFactory.createLineBorder(Color.BLACK);
+
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.fill = GridBagConstraints.BOTH;
+
+                int filasTotales = filas + 1;
+                int columnasTotales = columnas + 1;
+
+                // Construcción de la tabla con encabezados de forma dinámica
+                for (int i = 0; i < filasTotales; i++) {
+                    for (int j = 0; j < columnasTotales; j++) {
+                        gbc.gridx = j;
+                        gbc.gridy = i;
+
+                        JLabel celda;
+                        if (i == 0 && j == 0) {
+                            // Esquina: nombres de variables
+                            String textoEsquina = "";
+                            for (int v = 0; v < varFilas; v++) {
+                                textoEsquina += variables[v] + (v < varFilas - 1 ? ", " : "");
+                            }
+                            textoEsquina += " \\ ";
+                            for (int v = varFilas; v < totalVariables; v++) {
+                                textoEsquina += variables[v] + (v < totalVariables - 1 ? ", " : "");
+                            }
+
+                            celda = new JLabel(textoEsquina, SwingConstants.CENTER);
+                            celda.setFont(encabezadoFont);
+                            celda.setBorder(bordeEncabezado);
+                            celda.setPreferredSize(new Dimension(120, 40));
+                        } else if (i == 0) {
+                            // Encabezado de columna
+                            int bitsColumnas = Integer.toBinaryString(columnas - 1).length();
+                            String bin = String.format("%" + bitsColumnas + "s", Integer.toBinaryString(j - 1)).replace(" ", "0");
+
+                            celda = new JLabel(bin, SwingConstants.CENTER);
+                            celda.setFont(encabezadoFont);
+                            celda.setBorder(bordeEncabezado);
+                            celda.setPreferredSize(new Dimension(80, 40));
+                        } else if (j == 0) {
+                            // Encabezado de fila
+                            int bitsFilas = Integer.toBinaryString(filas - 1).length();
+                            String bin = String.format("%" + bitsFilas + "s", Integer.toBinaryString(i - 1)).replace(" ", "0");
+
+                            celda = new JLabel(bin, SwingConstants.CENTER);
+                            celda.setFont(encabezadoFont);
+                            celda.setBorder(bordeEncabezado);
+                            celda.setPreferredSize(new Dimension(120, 50));
+                        } else {
+                            // Contenido del mapa
+                            celda = new JLabel("" + mapa[i - 1][j - 1], SwingConstants.CENTER);
+                            celda.setFont(contenidoFont);
+                            celda.setBorder(bordeCelda);
+                            celda.setPreferredSize(new Dimension(120, 80));
+                        }
+
+                        PanelMapa.add(celda, gbc);
+                    }
+                }
+
+                // Tamaño del PanelMapa para qeu se active el scroll
+                int anchoTotal = columnasTotales * 120;
+                int altoTotal = filasTotales * 80;
+                PanelMapa.setPreferredSize(new Dimension(anchoTotal, altoTotal));
+
                 PanelMapa.revalidate();
                 PanelMapa.repaint();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, 
-                    "Error al leer el archivo: " + e.getMessage(),
-                    "Error", 
-                    JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Error al leer el archivo: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_ItemAbrirActionPerformed
