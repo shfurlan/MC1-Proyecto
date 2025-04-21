@@ -280,21 +280,21 @@ public class PantallaPrincipal extends javax.swing.JFrame {
                             StringBuilder textoEsquina = new StringBuilder("<html><center>");
 
                             // Poner variables de columnas
-                            for (int v = varFilas; v < totalVariables; v++) {
-                                textoEsquina.append(mapaK.variables[v]);
-                                if (v < totalVariables - 1) {
-                                    textoEsquina.append(", ");
-                                }
-                            }
-                            textoEsquina.append(" \\ ");
-
-                            // Poner variables de columnas
                             for (int v = 0; v < varFilas; v++) {
                                 textoEsquina.append(mapaK.variables[v]);
                                 if (v < varFilas - 1) {
                                     textoEsquina.append(", ");
                                 }
                             }
+                            textoEsquina.append(" \\ ");
+                            // Poner variables de filas
+                            for (int v = varFilas; v < totalVariables; v++) {
+                                textoEsquina.append(mapaK.variables[v]);
+                                if (v < totalVariables - 1) {
+                                    textoEsquina.append(", ");
+                                }
+                            }
+                            
                             textoEsquina.append("</center></html>");
 
                             dibujarCelda(textoEsquina.toString(), encabezadoFont, bordeEncabezado, new Dimension(100, 60), gbc);
