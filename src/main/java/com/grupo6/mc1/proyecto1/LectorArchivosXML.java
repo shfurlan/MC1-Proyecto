@@ -22,24 +22,28 @@ public class LectorArchivosXML {
     public MapaKarnaugh leerMapa(File archivoXML) throws Exception {
         int cantVariables = 0;
         int[] valores = new int[0];
-        String[] nombresVariables = new String[5]; // máximo 5 variables
+        String[] nombresVariables = new String[8]; // máximo 8 variables
 
         try (BufferedReader br = new BufferedReader(new FileReader(archivoXML))) {
             String linea;
             while ((linea = br.readLine()) != null) {
                 linea = linea.trim();
 
+                // Detectar inicio del mapa
                 if (linea.startsWith("<mapa")) {
+                    // Extrar la cantidad de variables (ej. v="2")
                     cantVariables = extraerAtributoNumero(linea, "v");
                     int totalCeldas = (int) Math.pow(2, cantVariables);
                     valores = new int[totalCeldas];
 
+                    // Extrar nombres de variables (ej. val1="X")
                     for (int i = 1; i <= cantVariables; i++) {
                         String nombre = extraerAtributoTexto(linea, "val" + i);
                         nombresVariables[i - 1] = nombre;
                     }
                 }
 
+                // Extraer el valor de cada celda
                 if (linea.startsWith("<valor")) {
                     int min = extraerAtributoNumero(linea, "min");
                     int valor = extraerContenidoValor(linea);
@@ -48,16 +52,19 @@ public class LectorArchivosXML {
             }
         }
 
+        // Determinar dimensiones del mapa
         int filas = (int) Math.pow(2, cantVariables / 2);
         int columnas = valores.length / filas;
+        
+        // Crear el mapa
         int[][] mapa = new int[filas][columnas];
-
         for (int i = 0; i < valores.length; i++) {
             int fila = i / columnas;
             int columna = i % columnas;
             mapa[fila][columna] = valores[i];
         }
 
+        // Retornar instancia del Objeto MapaKarnaugh
         return new MapaKarnaugh(mapa, nombresVariables);
     }
 

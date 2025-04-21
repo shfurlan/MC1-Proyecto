@@ -7,12 +7,14 @@ package com.grupo6.mc1.proyecto1.InterfazGrafica;
 import com.grupo6.mc1.proyecto1.LectorArchivosXML;
 import com.grupo6.mc1.proyecto1.MapaKarnaugh;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.io.File;
+import java.util.Arrays;
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -27,11 +29,38 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class PantallaPrincipal extends javax.swing.JFrame {
 
+    static int[][] mapa;
+    static int columnasTotales;
+    static int filasTotales;
+    static int anchoTotal;
+    static int altoTotal;
+    static MapaKarnaugh mapaK;
+    static PanelMapaConBurbujas PanelMapa;
+
     /**
      * Creates new form CargarArchivos
      */
     public PantallaPrincipal() {
         initComponents();
+
+        PanelMapa = new PanelMapaConBurbujas(new GridBagLayout());
+        ScrollMapa.setViewportView(PanelMapa);
+    }
+
+    /**
+     * Función utilitaria para dibujar celdas en un grid
+     *
+     * @param fuente Estilo de fuente de la celda
+     * @param borde Estilo de borde de la celda
+     * @param texto Contenido de la celda
+     * @param dimension Dimension de la celda
+     */
+    private void dibujarCelda(String texto, Font fuente, Border borde, Dimension dimension, GridBagConstraints gbc) {
+        JLabel celda = new JLabel(texto, SwingConstants.CENTER);
+        celda.setFont(fuente);
+        celda.setBorder(borde);
+        celda.setPreferredSize(new Dimension(100, 60));
+        PanelMapa.add(celda, gbc);
     }
 
     /**
@@ -47,12 +76,17 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         SelectorArchivo = new javax.swing.JFileChooser();
         PanelOperaciones = new javax.swing.JPanel();
         BtnCalcularMapa = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        txtFormaCanonica = new javax.swing.JLabel();
+        txtFormaSimplificada = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        txtBurbujasGeneradas = new javax.swing.JLabel();
         ScrollMapa = new javax.swing.JScrollPane();
-        PanelMapa = new javax.swing.JPanel();
         BarraMenus = new javax.swing.JMenuBar();
         MenuAbrir = new javax.swing.JMenu();
         ItemAbrir = new javax.swing.JMenuItem();
-        MenuEditar = new javax.swing.JMenu();
 
         VentanaSeleccionarArchivo.setSize(new java.awt.Dimension(600, 400));
 
@@ -77,39 +111,95 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         BtnCalcularMapa.setText("Calcular Mapa");
+        BtnCalcularMapa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BtnCalcularMapaActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("Resultados");
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Forma Simplificada");
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel3.setText("Forma Disyuntiva Canónica");
+
+        txtFormaCanonica.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtFormaCanonica.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        txtFormaCanonica.setMaximumSize(new java.awt.Dimension(300, 100));
+        txtFormaCanonica.setMinimumSize(new java.awt.Dimension(300, 100));
+        txtFormaCanonica.setPreferredSize(new java.awt.Dimension(300, 100));
+
+        txtFormaSimplificada.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtFormaSimplificada.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        txtFormaSimplificada.setMaximumSize(new java.awt.Dimension(300, 100));
+        txtFormaSimplificada.setMinimumSize(new java.awt.Dimension(300, 100));
+        txtFormaSimplificada.setPreferredSize(new java.awt.Dimension(300, 100));
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel4.setText("Burbujas generadas");
+
+        txtBurbujasGeneradas.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtBurbujasGeneradas.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        txtBurbujasGeneradas.setMaximumSize(new java.awt.Dimension(300, 100));
+        txtBurbujasGeneradas.setMinimumSize(new java.awt.Dimension(300, 100));
+        txtBurbujasGeneradas.setPreferredSize(new java.awt.Dimension(300, 100));
 
         javax.swing.GroupLayout PanelOperacionesLayout = new javax.swing.GroupLayout(PanelOperaciones);
         PanelOperaciones.setLayout(PanelOperacionesLayout);
         PanelOperacionesLayout.setHorizontalGroup(
             PanelOperacionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(PanelOperacionesLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(BtnCalcularMapa, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGap(36, 36, 36)
+                .addGroup(PanelOperacionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(PanelOperacionesLayout.createSequentialGroup()
+                        .addGroup(PanelOperacionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(PanelOperacionesLayout.createSequentialGroup()
+                                .addGap(124, 124, 124)
+                                .addComponent(jLabel1))
+                            .addComponent(jLabel3)
+                            .addGroup(PanelOperacionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(PanelOperacionesLayout.createSequentialGroup()
+                                    .addComponent(jLabel4)
+                                    .addGap(170, 170, 170))
+                                .addGroup(PanelOperacionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtFormaSimplificada, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel2)
+                                    .addComponent(txtFormaCanonica, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PanelOperacionesLayout.createSequentialGroup()
+                        .addGroup(PanelOperacionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtBurbujasGeneradas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(BtnCalcularMapa, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(212, 212, 212))))
         );
         PanelOperacionesLayout.setVerticalGroup(
             PanelOperacionesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, PanelOperacionesLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(20, 20, 20)
+                .addComponent(jLabel1)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel3)
+                .addGap(18, 18, 18)
+                .addComponent(txtFormaCanonica, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel2)
+                .addGap(18, 18, 18)
+                .addComponent(txtFormaSimplificada, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel4)
+                .addGap(18, 18, 18)
+                .addComponent(txtBurbujasGeneradas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(BtnCalcularMapa, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
-
-        PanelMapa.setBackground(javax.swing.UIManager.getDefaults().getColor("Button.background"));
-        PanelMapa.setAutoscrolls(true);
-
-        javax.swing.GroupLayout PanelMapaLayout = new javax.swing.GroupLayout(PanelMapa);
-        PanelMapa.setLayout(PanelMapaLayout);
-        PanelMapaLayout.setHorizontalGroup(
-            PanelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 612, Short.MAX_VALUE)
-        );
-        PanelMapaLayout.setVerticalGroup(
-            PanelMapaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 478, Short.MAX_VALUE)
-        );
-
-        ScrollMapa.setViewportView(PanelMapa);
 
         MenuAbrir.setText("Archivo");
 
@@ -123,9 +213,6 @@ public class PantallaPrincipal extends javax.swing.JFrame {
 
         BarraMenus.add(MenuAbrir);
 
-        MenuEditar.setText("Editar");
-        BarraMenus.add(MenuEditar);
-
         setJMenuBar(BarraMenus);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -133,59 +220,55 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(ScrollMapa, javax.swing.GroupLayout.DEFAULT_SIZE, 614, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(PanelOperaciones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(ScrollMapa, javax.swing.GroupLayout.DEFAULT_SIZE, 677, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(PanelOperaciones, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(PanelOperaciones, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(ScrollMapa)
+            .addComponent(ScrollMapa, javax.swing.GroupLayout.DEFAULT_SIZE, 552, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void ItemAbrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ItemAbrirActionPerformed
+        // Abrir dialogo de selecicon de archivo
         int seleccionArchivo = SelectorArchivo.showOpenDialog(VentanaSeleccionarArchivo);
 
         if (seleccionArchivo == JFileChooser.APPROVE_OPTION) {
             File archivo = SelectorArchivo.getSelectedFile();
 
             try {
+                // Leer mapa cargado e inicializar variables globales de la clase
                 LectorArchivosXML lector = new LectorArchivosXML();
-                MapaKarnaugh mapaK = lector.leerMapa(archivo);
-                int[][] mapa = mapaK.mapa;
-                String[] variables = mapaK.variables;
+                mapaK = lector.leerMapa(archivo);
+                mapa = mapaK.mapa;
+                filasTotales = mapa.length + 1;
+                columnasTotales = mapa[0].length + 1;
 
-                int filas = mapa.length;
-                int columnas = mapa[0].length;
-
-                int totalVariables = 0;
-                for (String var : variables) {
-                    if (var != null && !var.isEmpty()) {
-                        totalVariables++;
-                    }
-                }
-
-                int varFilas = totalVariables / 2;
-                int varColumnas = totalVariables - varFilas;
-
+                // Inicializar grid para rellenarlo con el mapa
                 PanelMapa.removeAll();
+                PanelMapa.setBurbujas(null);
                 PanelMapa.setLayout(new GridBagLayout());
 
-                Font encabezadoFont = new Font("Arial", Font.BOLD, 16);
-                Font contenidoFont = new Font("Arial", Font.PLAIN, 16);
+                // Variables de diseño
+                Font encabezadoFont = new Font("Segoe UI", Font.BOLD, 16);
+                Font contenidoFont = new Font("Segoe UI", Font.PLAIN, 16);
                 Border bordeEncabezado = BorderFactory.createLineBorder(Color.BLACK);
                 Border bordeCelda = BorderFactory.createLineBorder(Color.BLACK);
 
+                // Variables del grid
                 GridBagConstraints gbc = new GridBagConstraints();
                 gbc.fill = GridBagConstraints.BOTH;
 
-                int filasTotales = filas + 1;
-                int columnasTotales = columnas + 1;
+                // Obtener total de variables
+                int varFilas = mapaK.varFilas;
+                int varColumnas = mapaK.varColumnas;
+                int totalVariables = varFilas + varColumnas;
 
-                // Construcción de la tabla con encabezados de forma dinámica
                 for (int i = 0; i < filasTotales; i++) {
                     for (int j = 0; j < columnasTotales; j++) {
                         gbc.gridx = j;
@@ -193,65 +276,120 @@ public class PantallaPrincipal extends javax.swing.JFrame {
 
                         JLabel celda;
                         if (i == 0 && j == 0) {
-                            // Esquina: nombres de variables
-                            String textoEsquina = "";
-                            for (int v = 0; v < varFilas; v++) {
-                                textoEsquina += variables[v] + (v < varFilas - 1 ? ", " : "");
-                            }
-                            textoEsquina += " \\ ";
+                            // Poblar la celda de la esquina con nombres de variables
+                            StringBuilder textoEsquina = new StringBuilder("<html><center>");
+
+                            // Poner variables de columnas
                             for (int v = varFilas; v < totalVariables; v++) {
-                                textoEsquina += variables[v] + (v < totalVariables - 1 ? ", " : "");
+                                textoEsquina.append(mapaK.variables[v]);
+                                if (v < totalVariables - 1) {
+                                    textoEsquina.append(", ");
+                                }
                             }
+                            textoEsquina.append(" \\ ");
 
-                            celda = new JLabel(textoEsquina, SwingConstants.CENTER);
-                            celda.setFont(encabezadoFont);
-                            celda.setBorder(bordeEncabezado);
-                            celda.setPreferredSize(new Dimension(120, 40));
+                            // Poner variables de columnas
+                            for (int v = 0; v < varFilas; v++) {
+                                textoEsquina.append(mapaK.variables[v]);
+                                if (v < varFilas - 1) {
+                                    textoEsquina.append(", ");
+                                }
+                            }
+                            textoEsquina.append("</center></html>");
+
+                            dibujarCelda(textoEsquina.toString(), encabezadoFont, bordeEncabezado, new Dimension(100, 60), gbc);
+
                         } else if (i == 0) {
-                            // Encabezado de columna
-                            int bitsColumnas = Integer.toBinaryString(columnas - 1).length();
-                            String bin = String.format("%" + bitsColumnas + "s", Integer.toBinaryString(j - 1)).replace(" ", "0");
-
-                            celda = new JLabel(bin, SwingConstants.CENTER);
-                            celda.setFont(encabezadoFont);
-                            celda.setBorder(bordeEncabezado);
-                            celda.setPreferredSize(new Dimension(80, 40));
+                            // Encabezado de columna con código Gray
+                            dibujarCelda(mapaK.columnasGray[j - 1], encabezadoFont, bordeEncabezado, new Dimension(100, 40), gbc);
                         } else if (j == 0) {
-                            // Encabezado de fila
-                            int bitsFilas = Integer.toBinaryString(filas - 1).length();
-                            String bin = String.format("%" + bitsFilas + "s", Integer.toBinaryString(i - 1)).replace(" ", "0");
-
-                            celda = new JLabel(bin, SwingConstants.CENTER);
-                            celda.setFont(encabezadoFont);
-                            celda.setBorder(bordeEncabezado);
-                            celda.setPreferredSize(new Dimension(120, 50));
+                            // Encabezado de fila con código Gray                            
+                            dibujarCelda(mapaK.filasGray[i - 1], encabezadoFont, bordeEncabezado, new Dimension(100, 40), gbc);
                         } else {
-                            // Contenido del mapa
-                            celda = new JLabel("" + mapa[i - 1][j - 1], SwingConstants.CENTER);
-                            celda.setFont(contenidoFont);
-                            celda.setBorder(bordeCelda);
-                            celda.setPreferredSize(new Dimension(120, 80));
+                            // Celda del mapa
+                            dibujarCelda("" + mapa[i - 1][j - 1], contenidoFont, bordeCelda, new Dimension(100, 80), gbc);
                         }
-
-                        PanelMapa.add(celda, gbc);
                     }
                 }
 
-                // Tamaño del PanelMapa para qeu se active el scroll
-                int anchoTotal = columnasTotales * 120;
-                int altoTotal = filasTotales * 80;
+                // Poner el ancho y alto del mapa para activar el scrollView
+                anchoTotal = columnasTotales * 100;
+                altoTotal = filasTotales * 80;
                 PanelMapa.setPreferredSize(new Dimension(anchoTotal, altoTotal));
 
+                // Pintar el mapa
                 PanelMapa.revalidate();
                 PanelMapa.repaint();
+
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this,
                         "Error al leer el archivo: " + e.getMessage(),
                         "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE
+                );
+
+                e.printStackTrace();
             }
         }
     }//GEN-LAST:event_ItemAbrirActionPerformed
+
+    private void BtnCalcularMapaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnCalcularMapaActionPerformed
+        var burbujas = MapaKarnaugh.obtenerBurbujas(mapaK.mapa);
+        PanelMapa.setBurbujas(burbujas);
+
+        // Esribir forma canonica
+        txtFormaCanonica.setText(
+                "<html><div style='width:100%;'>"
+                + mapaK.generarFormaDisyuntivaCanonica()
+                + "</div></html>"
+        );
+
+        // Escribir forma simplificada
+        txtFormaSimplificada.setText(
+                "<html><div style='width:100%;'>"
+                + mapaK.generarExpresionSimplificada(burbujas)
+                + "</div></html>"
+        );
+
+        // Escirbir burbujas obtenidas con color
+        StringBuilder html = new StringBuilder();
+        html.append("<html><table>");
+
+        // Contador de color
+        int count = 0;
+
+        // Recorrer las burbujas para agregarlas al label
+        for (int i = 0; i < burbujas.size(); i++) {
+            int[][] burbuja = burbujas.get(i);
+            int[] ini = burbuja[0];
+            int[] fin = burbuja[1];
+
+            // Hacer columnas de 4 burjas
+            if (count % 4 == 0) {
+                if (count > 0) {
+                    html.append("</td>");
+                }
+                html.append("<td valign='top'>");
+            }
+
+            // Obtener color del borde de la burbuja
+            int colorRGB = PaletaColores.coloresBordes[i];
+            String hexColor = String.format("#%06X", colorRGB & 0xFFFFFF); // convertir int a color hex
+
+            // Darle formato de lectura estético
+            html.append("<span style='color: ").append(hexColor).append(";'>")
+                    .append("{[")
+                    .append(ini[0] + 1).append(", ").append(ini[1] + 1)
+                    .append("], [")
+                    .append(fin[0] + 1).append(", ").append(fin[1] + 1)
+                    .append("]}</span><br>");
+
+            count++;
+        }
+        html.append("</td></table></html>");
+
+        txtBurbujasGeneradas.setText(html.toString());
+    }//GEN-LAST:event_BtnCalcularMapaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -294,11 +432,16 @@ public class PantallaPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton BtnCalcularMapa;
     private javax.swing.JMenuItem ItemAbrir;
     private javax.swing.JMenu MenuAbrir;
-    private javax.swing.JMenu MenuEditar;
-    private javax.swing.JPanel PanelMapa;
     private javax.swing.JPanel PanelOperaciones;
     private javax.swing.JScrollPane ScrollMapa;
     private javax.swing.JFileChooser SelectorArchivo;
     private javax.swing.JDialog VentanaSeleccionarArchivo;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel txtBurbujasGeneradas;
+    private javax.swing.JLabel txtFormaCanonica;
+    private javax.swing.JLabel txtFormaSimplificada;
     // End of variables declaration//GEN-END:variables
 }
